@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Panel — PGT Pay Justice</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0f1923;--paper:#f7f5f0;--accent:#c0392b;--green:#1a6b3c;
+  --blue:#1565c0;--gold:#b8860b;--rule:#d4cfc4;--white:#fff;--soft:#3a4a58;
+}
+body{font-family:'Inter',sans-serif;background:#0f1923;color:#fff;min-height:100vh;}
+
+/* LOGIN */
+.login-screen{
+  display:flex;align-items:center;justify-content:center;min-height:100vh;
+  background:linear-gradient(135deg,#0f1923 0%,#1a2d3d 100%);
+}
+.login-box{
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);
+  padding:2.5rem;width:380px;
+}
+.login-box h2{font-size:1.4rem;margin-bottom:0.4rem;font-weight:700;}
+.login-box p{font-size:0.82rem;color:#6a8090;margin-bottom:2rem;}
+.login-box input{
+  width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
+  color:#fff;padding:0.75rem 1rem;font-size:0.9rem;border-radius:2px;margin-bottom:1rem;
+  font-family:'Inter',sans-serif;outline:none;
+}
+.login-box input:focus{border-color:rgba(255,255,255,0.5);}
+.login-box input::placeholder{color:#3a5060;}
+.btn-login{
+  width:100%;background:#c0392b;color:#fff;border:none;padding:0.85rem;
+  font-weight:700;font-size:0.95rem;cursor:pointer;letter-spacing:0.02em;
+  font-family:'Inter',sans-serif;transition:background .2s;
+}
+.btn-login:hover{background:#8b1a12;}
+.login-err{color:#e87067;font-size:0.8rem;margin-top:0.7rem;display:none;}
+
+/* ADMIN LAYOUT */
+.admin-wrap{display:none;min-height:100vh;flex-direction:column;}
+.admin-topbar{
+  background:#080f16;border-bottom:1px solid rgba(255,255,255,0.1);
+  padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.admin-topbar h1{font-size:0.95rem;font-weight:700;color:#fff;}
+.admin-topbar h1 span{color:#c0392b;}
+.topbar-right{display:flex;align-items:center;gap:1.2rem;}
+.topbar-badge{
+  background:rgba(192,57,43,0.2);border:1px solid rgba(192,57,43,0.4);
+  color:#e87067;font-family:'DM Mono',monospace;font-size:0.68rem;
+  padding:3px 10px;border-radius:2px;letter-spacing:0.06em;
+}
+.btn-logout{
+  background:transparent;border:1px solid rgba(255,255,255,0.25);color:#8fa0b0;
+  padding:5px 14px;font-size:0.78rem;cursor:pointer;font-family:'Inter',sans-serif;
+  border-radius:2px;transition:all .2s;
+}
+.btn-logout:hover{border-color:#fff;color:#fff;}
+
+.admin-body{display:flex;flex:1;}
+.sidebar{
+  width:220px;flex-shrink:0;background:#080f16;border-right:1px solid rgba(255,255,255,0.08);
+  padding:1.5rem 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;
+}
+.sidebar-section{padding:0.6rem 1.2rem;font-family:'DM Mono',monospace;font-size:0.62rem;
+  color:#3a5060;text-transform:uppercase;letter-spacing:0.1em;margin-top:1rem;}
+.sidebar-item{
+  display:flex;align-items:center;gap:0.7rem;padding:0.65rem 1.5rem;
+  font-size:0.82rem;color:#8fa0b0;cursor:pointer;transition:all .2s;border:none;
+  background:transparent;width:100%;text-align:left;font-family:'Inter',sans-serif;
+}
+.sidebar-item:hover{background:rgba(255,255,255,0.05);color:#fff;}
+.sidebar-item.active{background:rgba(192,57,43,0.15);color:#fff;border-right:3px solid #c0392b;}
+.sidebar-item .icon{font-size:1rem;width:18px;flex-shrink:0;}
+
+.admin-content{flex:1;padding:2rem;overflow-y:auto;}
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* CARDS & FORMS */
+.card{
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);
+  padding:1.8rem;margin-bottom:1.5rem;
+}
+.card-title{
+  font-size:1rem;font-weight:700;margin-bottom:0.4rem;display:flex;align-items:center;gap:0.6rem;
+}
+.card-sub{font-size:0.8rem;color:#6a8090;margin-bottom:1.5rem;}
+.field-group{display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1.1rem;}
+.field-group label{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#5a7080;}
+.field-group input,.field-group select,.field-group textarea{
+  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.18);
+  color:#fff;padding:0.65rem 0.9rem;font-size:0.87rem;
+  font-family:'Inter',sans-serif;border-radius:2px;outline:none;transition:border-color .2s;
+}
+.field-group input:focus,.field-group select:focus,.field-group textarea:focus{border-color:rgba(255,255,255,0.45);}
+.field-group input::placeholder,.field-group textarea::placeholder{color:#3a5060;}
+.field-group select option{background:#0f1923;}
+.field-group textarea{min-height:90px;resize:vertical;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+
+.btn-save{
+  background:#c0392b;color:#fff;border:none;padding:0.7rem 1.8rem;
+  font-weight:600;font-size:0.88rem;cursor:pointer;border-radius:2px;
+  font-family:'Inter',sans-serif;transition:background .2s;
+}
+.btn-save:hover{background:#8b1a12;}
+.btn-secondary{
+  background:transparent;color:#8fa0b0;border:1px solid rgba(255,255,255,0.2);
+  padding:0.7rem 1.4rem;font-size:0.88rem;cursor:pointer;border-radius:2px;
+  font-family:'Inter',sans-serif;transition:all .2s;margin-left:0.8rem;
+}
+.btn-secondary:hover{border-color:#fff;color:#fff;}
+.btn-danger{
+  background:rgba(192,57,43,0.15);color:#e87067;border:1px solid rgba(192,57,43,0.3);
+  padding:5px 12px;font-size:0.76rem;cursor:pointer;border-radius:2px;
+  font-family:'Inter',sans-serif;transition:all .2s;
+}
+.btn-danger:hover{background:#c0392b;color:#fff;}
+.btn-edit{
+  background:rgba(21,101,192,0.15);color:#90caf9;border:1px solid rgba(21,101,192,0.3);
+  padding:5px 12px;font-size:0.76rem;cursor:pointer;border-radius:2px;
+  font-family:'Inter',sans-serif;transition:all .2s;
+}
+.btn-edit:hover{background:#1565c0;color:#fff;}
+
+/* TABLES */
+.data-table{width:100%;border-collapse:collapse;font-size:0.84rem;}
+.data-table th{
+  text-align:left;font-size:0.67rem;font-weight:600;letter-spacing:0.07em;
+  text-transform:uppercase;color:#5a7080;padding:0.5rem 0.8rem;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.data-table td{padding:0.75rem 0.8rem;border-bottom:1px solid rgba(255,255,255,0.06);color:#bbc4ce;vertical-align:middle;}
+.data-table tr:hover td{background:rgba(255,255,255,0.03);}
+.data-table td:last-child{display:flex;gap:0.5rem;align-items:center;}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:2px;font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:500;letter-spacing:0.05em;}
+.badge-green{background:rgba(26,107,60,0.2);color:#4caf50;border:1px solid rgba(26,107,60,0.3);}
+.badge-red{background:rgba(192,57,43,0.2);color:#e87067;border:1px solid rgba(192,57,43,0.3);}
+.badge-blue{background:rgba(21,101,192,0.2);color:#90caf9;border:1px solid rgba(21,101,192,0.3);}
+.badge-gold{background:rgba(184,134,11,0.2);color:#ffd54f;border:1px solid rgba(184,134,11,0.3);}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+.stat-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);padding:1.4rem;border-top:3px solid;}
+.stat-box.red{border-top-color:#c0392b;}
+.stat-box.green{border-top-color:#1a6b3c;}
+.stat-box.blue{border-top-color:#1565c0;}
+.stat-box.gold{border-top-color:#b8860b;}
+.stat-num{font-family:'DM Mono',monospace;font-size:1.8rem;font-weight:500;margin-bottom:0.3rem;}
+.stat-label{font-size:0.72rem;color:#5a7080;text-transform:uppercase;letter-spacing:0.07em;}
+
+/* SUCCESS TOAST */
+.admin-toast{
+  position:fixed;bottom:2rem;right:2rem;background:#1a6b3c;color:#fff;
+  padding:0.85rem 1.4rem;border-radius:2px;font-size:0.84rem;font-weight:600;
+  opacity:0;transform:translateY(10px);transition:all .3s;z-index:9999;pointer-events:none;
+}
+.admin-toast.show{opacity:1;transform:translateY(0);}
+
+.section-divider{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:1.5rem 0;}
+
+/* CONTACT PARTY CHIPS */
+.party-chip{
+  display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.72rem;
+  font-weight:600;margin-right:4px;
+}
+.chip-pml{background:#1a6b3c;color:#fff;}
+.chip-pti{background:#c0392b;color:#fff;}
+.chip-pppp{background:#1565c0;color:#fff;}
+.chip-mqm{background:#b8860b;color:#fff;}
+.chip-other{background:#3a4a58;color:#fff;}
+
+/* EXPORT BTN */
+.btn-export{
+  background:rgba(26,107,60,0.15);color:#4caf50;border:1px solid rgba(26,107,60,0.3);
+  padding:6px 14px;font-size:0.78rem;cursor:pointer;border-radius:2px;
+  font-family:'Inter',sans-serif;transition:all .2s;
+}
+.btn-export:hover{background:#1a6b3c;color:#fff;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LOGIN ══════════════════ -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h2>🔐 Admin Access</h2>
+    <p>PGT Pay Justice — Content Management Panel</p>
+    <input type="text" id="adminUser" placeholder="Username" autocomplete="off"/>
+    <input type="password" id="adminPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="btn-login" onclick="doLogin()">Sign In →</button>
+    <p class="login-err" id="loginErr">⚠ Incorrect credentials. Try again.</p>
+    <p style="font-size:0.72rem;color:#3a5060;margin-top:1.5rem;font-family:'DM Mono',monospace;">
+      Default: admin / PGT@Justice2026<br>Change in Settings after first login.
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════════ ADMIN UI ══════════════════ -->
+<div class="admin-wrap" id="adminWrap">
+
+  <!-- TOPBAR -->
+  <div class="admin-topbar">
+    <h1>PGT <span>Pay Justice</span> — Admin Panel</h1>
+    <div class="topbar-right">
+      <span class="topbar-badge">SECURE SESSION</span>
+      <a href="index.html" target="_blank" style="color:#8fa0b0;font-size:0.8rem;text-decoration:none;">View Site ↗</a>
+      <button class="btn-logout" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="admin-body">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-section">Dashboard</div>
+      <button class="sidebar-item active" onclick="showPanel('dashboard',this)"><span class="icon">📊</span> Overview</button>
+      <button class="sidebar-item" onclick="showPanel('signatures',this)"><span class="icon">✍️</span> Signatures</button>
+
+      <div class="sidebar-section">Content</div>
+      <button class="sidebar-item" onclick="showPanel('parliamentarians',this)"><span class="icon">🏛️</span> Parliamentarians</button>
+      <button class="sidebar-item" onclick="showPanel('documents',this)"><span class="icon">📄</span> Documents</button>
+      <button class="sidebar-item" onclick="showPanel('demands',this)"><span class="icon">📋</span> Demands</button>
+      <button class="sidebar-item" onclick="showPanel('ticker',this)"><span class="icon">📢</span> Ticker / Alerts</button>
+
+      <div class="sidebar-section">Campaign</div>
+      <button class="sidebar-item" onclick="showPanel('complaint_templates',this)"><span class="icon">⚖️</span> Complaint Templates</button>
+      <button class="sidebar-item" onclick="showPanel('media',this)"><span class="icon">📰</span> Media Coverage</button>
+
+      <div class="sidebar-section">System</div>
+      <button class="sidebar-item" onclick="showPanel('settings',this)"><span class="icon">⚙️</span> Settings</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="admin-content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="panel active" id="panel-dashboard">
+        <h2 style="font-size:1.3rem;margin-bottom:0.4rem;">Campaign Dashboard</h2>
+        <p style="color:#5a7080;font-size:0.84rem;margin-bottom:2rem;">Overview — PGT Pay Justice Pakistan</p>
+
+        <div class="stats-row">
+          <div class="stat-box red">
+            <div class="stat-num" id="dash-sigs">1,247</div>
+            <div class="stat-label">Total Signatures</div>
+          </div>
+          <div class="stat-box green">
+            <div class="stat-num" id="dash-parl">0</div>
+            <div class="stat-label">Parliamentarians Listed</div>
+          </div>
+          <div class="stat-box blue">
+            <div class="stat-num" id="dash-docs">9</div>
+            <div class="stat-label">Documents on Record</div>
+          </div>
+          <div class="stat-box gold">
+            <div class="stat-num">Rs.0</div>
+            <div class="stat-label">Budget 2026-27 Allocation</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📌 Campaign Status</div>
+          <div class="card-sub">Key milestones and action items</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div style="background:rgba(26,107,60,0.1);border:1px solid rgba(26,107,60,0.25);padding:1rem;">
+              <p style="font-size:0.72rem;color:#4caf50;font-family:'DM Mono',monospace;margin-bottom:0.5rem;">COMPLETED</p>
+              <p style="font-size:0.84rem;color:#bbc4ce;">✅ Federal Ombudsman complaint filed (Dr. Muhammad Usman, Jun 2026)</p>
+              <p style="font-size:0.84rem;color:#bbc4ce;margin-top:0.5rem;">✅ Campaign website deployed</p>
+              <p style="font-size:0.84rem;color:#bbc4ce;margin-top:0.5rem;">✅ Document evidence compiled (9 official notifications)</p>
+            </div>
+            <div style="background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.25);padding:1rem;">
+              <p style="font-size:0.72rem;color:#e87067;font-family:'DM Mono',monospace;margin-bottom:0.5rem;">ACTION NEEDED</p>
+              <p style="font-size:0.84rem;color:#bbc4ce;">⏳ Add Health Committee parliamentarians (use panel →)</p>
+              <p style="font-size:0.84rem;color:#bbc4ce;margin-top:0.5rem;">⏳ Upload scanned official notifications</p>
+              <p style="font-size:0.84rem;color:#bbc4ce;margin-top:0.5rem;">⏳ Coordinate mass filing date with PGT groups</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">⚡ Quick Actions</div>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+            <button class="btn-save" onclick="showPanel('parliamentarians',document.querySelectorAll('.sidebar-item')[3])">+ Add Parliamentarian</button>
+            <button class="btn-secondary" onclick="showPanel('documents',document.querySelectorAll('.sidebar-item')[4])">+ Upload Document</button>
+            <button class="btn-secondary" onclick="showPanel('ticker',document.querySelectorAll('.sidebar-item')[6])">Edit Ticker Alert</button>
+            <button class="btn-export" onclick="exportSignatures()">Export Signatures CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SIGNATURES ── -->
+      <div class="panel" id="panel-signatures">
+        <h2 style="font-size:1.3rem;margin-bottom:0.4rem;">Petition Signatures</h2>
+        <p style="color:#5a7080;font-size:0.84rem;margin-bottom:2rem;">Manage and export petition signatures</p>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+            <div class="card-title">Signature Records</div>
+            <button class="btn-export" onclick="exportSignatures()">⬇ Export CSV</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table" id="sigTable">
+              <thead><tr>
+                <th>#</th><th>Name</th><th>Hospital</th><th>City</th><th>Speciality</th><th>Date</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="sigBody">
+                <tr><td colspan="7" style="text-align:center;color:#3a5060;padding:2rem;">No signatures recorded yet in this session. They appear here as doctors sign.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PARLIAMENTARIANS ── -->
+      <div class="panel" id="panel-parliamentarians">
+        <h2 style="font-size:1.3rem;margin-bottom:0.4rem;">🏛️ Parliamentarians — Health Committees</h2>
+        <p style="color:#5a7080;font-size:0.84rem;margin-bottom:2rem;">Add contact details for National Assembly Standing Committee on Health, Senate Health Committee, and individual MNAs/Senators to be displayed on the website for mass contact campaigns.</p>
+
+        <div class="card">
+          <div class="card-title">Add Parliamentarian</div>
+          <div class="card-sub">Details will appear on the website's "Contact Lawmakers" section</div>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Full Name *</label>
+              <input type="text" id="parl_name" placeholder="e.g. Dr. Nafeesa Shah"/>
+            </div>
+            <div class="field-group">
+              <label>Designation / Title</label>
+              <input type="text" id="parl_title" placeholder="e.g. Chairperson, NA Standing Committee on Health"/>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Political Party</label>
+              <select id="parl_party">
+                <option value="">Select Party</option>
+                <option value="pml-n">PML-N</option>
+                <option value="ppp">PPP</option>
+                <option value="pti">PTI</option>
+                <option value="mqm">MQM-P</option>
+                <option value="ipp">IPP</option>
+                <option value="jui">JUI-F</option>
+                <option value="other">Other / Independent</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label>Committee Role</label>
+              <select id="parl_role">
+                <option value="">Select Role</option>
+                <option>Chairperson — NA Health Committee</option>
+                <option>Member — NA Health Committee</option>
+                <option>Chairperson — Senate Health Committee</option>
+                <option>Member — Senate Health Committee</option>
+                <option>MNA — Health Advocacy</option>
+                <option>Senator — Health Advocacy</option>
+                <option>Federal Minister of Health</option>
+                <option>State Minister of Health</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Mobile / WhatsApp Number</label>
+              <input type="tel" id="parl_phone" placeholder="e.g. 0300-1234567"/>
+            </div>
+            <div class="field-group">
+              <label>Email Address</label>
+              <input type="email" id="parl_email" placeholder="e.g. nafeesa.shah@na.gov.pk"/>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Twitter / X Handle</label>
+              <input type="text" id="parl_twitter" placeholder="e.g. @NafeesaShahPPP"/>
+            </div>
+            <div class="field-group">
+              <label>Constituency / Province</label>
+              <input type="text" id="parl_const" placeholder="e.g. NA-207 Larkana / Punjab"/>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Notes (internal — not shown on website)</label>
+            <textarea id="parl_notes" placeholder="e.g. Previously supportive of PGT issues. Spoke in NA session Oct 2024..."></textarea>
+          </div>
+          <div>
+            <button class="btn-save" onclick="addParliamentarian()">Add to Website →</button>
+            <button class="btn-secondary" onclick="clearParlForm()">Clear</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+            <div class="card-title">Listed Parliamentarians <span style="font-family:'DM Mono',monospace;font-size:0.8rem;color:#5a7080;" id="parlCount">(0)</span></div>
+            <button class="btn-export" onclick="exportParliamentarians()">⬇ Export CSV</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead><tr>
+                <th>Name</th><th>Party</th><th>Role</th><th>Phone</th><th>Email</th><th>Twitter</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="parlBody">
+                <tr><td colspan="7" style="text-align:center;color:#3a5060;padding:2rem;">No parliamentarians added yet. Use the form above to add health committee members.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DOCUMENTS ── -->
+      <div class="panel" id="panel-documents">
+        <h2 style="font-size:1.3rem;margin-bottom:0.4rem;">📄 Official Documents</h2>
+        <p style="color:#5a7080;font-size:0.84rem;margin-bottom:2rem;">Manage official government notifications and evidence documents shown on the website</p>
+
+        <div class="card">
+          <div class="card-title">Add Document / Notification</div>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Document Title *</label>
+              <input type="text" id="doc_title" placeholder="e.g. Federal PGT Stipend Notification 2020"/>
+            </div>
+            <div class="field-group">
+              <label>File / Reference Number</label>
+              <input type="text" id="doc_ref" placeholder="e.g. F.No.9-24/2016-E-I"/>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Issuing Authority *</label>
+              <input type="text" id="doc_auth" placeholder="e.g. Ministry of NHS,R&C"/>
+            </div>
+            <div class="field-group">
+              <label>Date of Notification *</label>
+              <input type="date" id="doc_date"/>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Key Content / Summary</label>
+            <textarea id="doc_summary" placeholder="e.g. Fixes PGR stipend at Rs.104,390/month. Approved by PM. w.e.f. 01.07.2020..."></textarea>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Document Type</label>
+              <select id="doc_type">
+                <option>Federal Government Notification</option>
+                <option>Punjab Government Notification</option>
+                <option>CPSP Regulatory Notification</option>
+                <option>PM&DC Regulation / Notice</option>
+                <option>Punjab Health Foundation Advisory</option>
+                <option>Private Hospital Salary Schedule</option>
+                <option>Budget Document</option>
+                <option>Court / Ombudsman Order</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label>Relevance / Importance</label>
+              <select id="doc_importance">
+                <option value="high">🔴 High — Core Evidence</option>
+                <option value="medium">🟡 Medium — Supporting</option>
+                <option value="low">🟢 Low — Reference Only</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-save" onclick="addDocument()">Add Document →</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Document Registry <span style="font-family:'DM Mono',monospace;font-size:0.8rem;color:#5a7080;" id="docCount">(9 on record)</span></div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead><tr><th>Title</th><th>Ref No.</th><th>Authority</th><th>Date</th><th>Type</th><th>Actions</th></tr></thead>
+              <tbody id="docBody">
+                <tr><td>Federal Stipend Notification 2020</td><td style="font-family:'DM Mono',monospace;font-size:0.76rem;">F.No.9-24/2016-E-I</td><td>M/o NHS,R&C</td><td>27 Jan 2020</td><td><span class="badge badge-red">Federal Govt</span></td><td><button class="btn-edit">Edit</button><button class="btn-danger" style="margin-left:4px;">Del</button></td></tr>
+                <tr><td>BPS Doctors Allowances 2020</td><td style="font-family:'DM Mono',monospace;font-size:0.76rem;">F.No.10-368/2019-H-I</td><td>M/o NHS,R&C</td><td>30 Sep 2020</td><td><span class="badge badge-red">Federal Govt</span></td><td><button class="btn-edit">Edit</button><button class="btn-danger" style="margin-left:4px;">Del</button></td></tr>
+                <tr><td>KEMU PGT Revision 2024</td><td style="font-family:'DM Mono',monospace;font-size:0.76rem;">No.9426/KEMU</td><td>KEMU Lahore</td><td>27 Jul 2024</td><td><span class="badge badge-green">Punjab Govt</span></td><td><button class="btn-edit">Edit</button><button class="btn-danger" style="margin-left:4px;">Del</button></td></tr>
+                <tr><td>KEMU PGT Revision 2025</td><td style="font-family:'DM Mono',monospace;font-size:0.76rem;">No.11428/KEMU</td><td>KEMU Lahore</td><td>23 Oct 2025</td><td><span class="badge badge-green">Punjab Govt</span></td><td><button class="btn-edit">Edit</button><button class="btn-danger" style="margin-left:4px;">Del</button></td></tr>
+                <tr><td>Punjab Health Foundation Advisory</td><td style="font-family:'DM Mono',monospace;font-size:0.76rem;">PHF/ADMIN/3758</td><td>Punjab Health Foundation</td><td>16 Jan 2025</td><td><span class="badge badge-green">Punjab Govt</span></td><td><button class="btn-edit">Edit</button><button class="btn-danger" style="margin-left:4px;">Del</button></td></tr>
+                <tr><td>PM&DC Stipend Notice</td><td style="font-family:'DM Mono',monospace;font-size:0.76rem;">Public Notice</td><td>PM&DC Islamabad</td><td>29 Aug 2025</td><td><span class="badge badge-gold">PM&DC</span></td><td><button class="btn-edit">Edit</button><button class="btn-danger" style="margin-left:4px;">Del</button></td></tr>
+                <tr><td>CPSP Grade-17 Parity Mandate</td><td style="font-family:'DM Mono',monospace;font-size:0.76rem;">Point No. 6</td><td>CPSP Karachi</td><td>09 Jun 2026</td><td><span class="badge badge-blue">CPSP</span></td><td><button class="btn-edit">Edit</button><button class="btn-danger" style="margin-left:4px;">Del</button></td></tr>
+                <tr><td>AKU Residency Salary Structure</td><td style="font-family:'DM Mono',monospace;font-size:0.76rem;">PGME Official</td><td>Aga Khan University</td><td>2025</td><td><span class="badge">Private Hospital</span></td><td><button class="btn-edit">Edit</button><button class="btn-danger" style="margin-left:4px;">Del</button></td></tr>
+                <tr><td>Shifa International PGME Schedule</td><td style="font-family:'DM Mono',monospace;font-size:0.76rem;">PGME Official</td><td>Shifa International</td><td>2025</td><td><span class="badge">Private Hospital</span></td><td><button class="btn-edit">Edit</button><button class="btn-danger" style="margin-left:4px;">Del</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DEMANDS ── -->
+      <div class="panel" id="panel-demands">
+        <h2 style="font-size:1.3rem;margin-bottom:0.4rem;">📋 Campaign Demands</h2>
+        <p style="color:#5a7080;font-size:0.84rem;margin-bottom:2rem;">Edit the 7 formal demands displayed on the website</p>
+        <div class="card">
+          <div class="card-title">Edit Demands</div>
+          <div class="card-sub">These appear in the "Formal Demands" section. Changes require re-publishing the site.</div>
+          <div id="demandsEditor">
+            <div style="margin-bottom:1.2rem;padding:1rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);">
+              <div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:#e87067;margin-bottom:0.5rem;">DEMAND 01</div>
+              <div class="field-group" style="margin:0;"><label>Title</label><input type="text" value="Investigate 6-Year Non-Revision"/></div>
+              <div class="field-group" style="margin-top:0.7rem;margin-bottom:0;"><label>Description</label><textarea style="min-height:60px;">Federal Ombudsman to investigate the prolonged failure of M/o NHS,R&C to revise PGT stipends since 2020, despite annual government salary increases and binding regulatory mandates.</textarea></div>
+            </div>
+            <div style="margin-bottom:1.2rem;padding:1rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);">
+              <div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:#e87067;margin-bottom:0.5rem;">DEMAND 02</div>
+              <div class="field-group" style="margin:0;"><label>Title</label><input type="text" value="Explain Systematic Exclusion"/></div>
+              <div class="field-group" style="margin-top:0.7rem;margin-bottom:0;"><label>Description</label><textarea style="min-height:60px;">Ministry to provide detailed written explanation for excluding PGTs from every annual budget revision since 2020, while all other federal employee cadres received enhancements.</textarea></div>
+            </div>
+            <p style="font-size:0.78rem;color:#5a7080;margin-top:0.5rem;">+ 5 more demands (Demands 3–7 editable in next update)</p>
+          </div>
+          <hr class="section-divider"/>
+          <button class="btn-save" onclick="showToast('Demands saved. Re-deploy site to publish changes.')">Save Demands</button>
+        </div>
+      </div>
+
+      <!-- ── TICKER ── -->
+      <div class="panel" id="panel-ticker">
+        <h2 style="font-size:1.3rem;margin-bottom:0.4rem;">📢 Ticker &amp; Alert Banner</h2>
+        <p style="color:#5a7080;font-size:0.84rem;margin-bottom:2rem;">Edit the scrolling ticker at top of page and the Budget 2026-27 alert banner</p>
+        <div class="card">
+          <div class="card-title">Scrolling Ticker Text</div>
+          <div class="field-group">
+            <label>Ticker Content (use | to separate items)</label>
+            <textarea id="tickerText" style="min-height:100px;">🚨 FEDERAL PGT STIPEND FROZEN AT Rs.104,390 SINCE 27 JAN 2020 | FEDERAL BUDGET 2026–27: ZERO ALLOCATION FOR PGT STIPEND REVISION | Punjab PGTs earn Rs.140,901/month (Oct 2025) — Federal PGTs still at Rs.104,390 | CPSP mandates Grade-17 parity — FEDERAL INSTITUTIONS IN BREACH | Sign Petition · File Ombudsman Complaint · Use PM Citizen Portal · #PGTPayJustice</textarea>
+          </div>
+          <button class="btn-save" onclick="showToast('Ticker text saved. Update index.html to publish.')">Save Ticker</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Budget Alert Banner</div>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Banner Headline</label>
+              <input type="text" value="BREAKING — Federal Budget 2026–27: Zero Allocation for PGT Stipend Increase"/>
+            </div>
+            <div class="field-group">
+              <label>Badge Text</label>
+              <input type="text" value="BUDGET 2026–27 | ZERO FOR PGTs"/>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Banner Body Text</label>
+            <textarea style="min-height:80px;">The Government of Pakistan's Federal Budget for the financial year 2026–27 has been announced. For the seventh consecutive year, no funds have been allocated for revision of Postgraduate Trainee stipends.</textarea>
+          </div>
+          <button class="btn-save" onclick="showToast('Banner saved. Update index.html to publish.')">Save Banner</button>
+        </div>
+      </div>
+
+      <!-- ── COMPLAINT TEMPLATES ── -->
+      <div class="panel" id="panel-complaint_templates">
+        <h2 style="font-size:1.3rem;margin-bottom:0.4rem;">⚖️ Complaint Templates</h2>
+        <p style="color:#5a7080;font-size:0.84rem;margin-bottom:2rem;">Edit the copy-paste complaint templates shown on the website</p>
+        <div class="card">
+          <div class="card-title">Wafaqi Mohtasib Template</div>
+          <div class="field-group">
+            <label>Template Text</label>
+            <textarea style="min-height:260px;font-family:'DM Mono',monospace;font-size:0.8rem;">To,
+The Honourable Wafaqi Mohtasib (Federal Ombudsman)
+Government of Pakistan, Islamabad
+
+Subject: Complaint — Non-Revision of PGT Stipends in Federal Healthcare Institutions Since January 2020 (Budget 2026-27: Zero Allocation)
+
+[Template continues — edit as needed]</textarea>
+          </div>
+          <button class="btn-save" onclick="showToast('Template saved.')">Save Template</button>
+        </div>
+      </div>
+
+      <!-- ── MEDIA ── -->
+      <div class="panel" id="panel-media">
+        <h2 style="font-size:1.3rem;margin-bottom:0.4rem;">📰 Media Coverage</h2>
+        <p style="color:#5a7080;font-size:0.84rem;margin-bottom:2rem;">Track and display press coverage of the campaign</p>
+        <div class="card">
+          <div class="card-title">Add Media Coverage</div>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Headline</label>
+              <input type="text" id="media_title" placeholder="e.g. Dawn — PGT Doctors Demand Stipend Revision After 6-Year Freeze"/>
+            </div>
+            <div class="field-group">
+              <label>Publication</label>
+              <input type="text" id="media_pub" placeholder="e.g. Dawn, Geo, ARY, Tribune..."/>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Date</label>
+              <input type="date" id="media_date"/>
+            </div>
+            <div class="field-group">
+              <label>Link / URL</label>
+              <input type="url" id="media_url" placeholder="https://..."/>
+            </div>
+          </div>
+          <button class="btn-save" onclick="addMedia()">Add Coverage →</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Coverage Tracker</div>
+          <table class="data-table">
+            <thead><tr><th>Headline</th><th>Publication</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody id="mediaBody">
+              <tr><td colspan="4" style="text-align:center;color:#3a5060;padding:2rem;">No media coverage added yet. Add press mentions above.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="panel" id="panel-settings">
+        <h2 style="font-size:1.3rem;margin-bottom:0.4rem;">⚙️ Settings</h2>
+        <p style="color:#5a7080;font-size:0.84rem;margin-bottom:2rem;">Configure admin access and campaign settings</p>
+        <div class="card">
+          <div class="card-title">🔐 Change Admin Password</div>
+          <div class="card-sub">Default credentials: admin / PGT@Justice2026</div>
+          <div class="field-group"><label>Current Password</label><input type="password" id="curr_pass" placeholder="Current password"/></div>
+          <div class="field-row">
+            <div class="field-group"><label>New Password</label><input type="password" id="new_pass" placeholder="New password (min 8 chars)"/></div>
+            <div class="field-group"><label>Confirm New Password</label><input type="password" id="conf_pass" placeholder="Confirm new password"/></div>
+          </div>
+          <button class="btn-save" onclick="changePassword()">Update Password</button>
+        </div>
+        <div class="card">
+          <div class="card-title">📧 Campaign Contact</div>
+          <div class="field-row">
+            <div class="field-group"><label>Campaign Email</label><input type="email" value="pgtpayjustice@gmail.com"/></div>
+            <div class="field-group"><label>Petition Goal</label><input type="number" value="10000"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field-group"><label>Campaign Lead Name</label><input type="text" value="Dr. Muhammad Usman"/></div>
+            <div class="field-group"><label>Campaign Lead Contact</label><input type="tel" value="03019036629"/></div>
+          </div>
+          <button class="btn-save" onclick="showToast('Settings saved.')">Save Settings</button>
+        </div>
+        <div class="card">
+          <div class="card-title">🌐 GitHub Pages Info</div>
+          <div class="card-sub">Your site deployment details</div>
+          <div style="background:rgba(255,255,255,0.04);padding:1.2rem;font-family:'DM Mono',monospace;font-size:0.78rem;color:#8fa0b0;line-height:2;">
+            <div>Repository: <span style="color:#fff;">github.com/[YOUR-USERNAME]/pgt-pay-justice.github.io</span></div>
+            <div>Live URL: <span style="color:#4caf50;">https://pgt-pay-justice.github.io</span></div>
+            <div>Branch: <span style="color:#fff;">main</span></div>
+            <div>Admin Panel URL: <span style="color:#fff;">https://pgt-pay-justice.github.io/admin.html</span></div>
+            <div style="margin-top:0.8rem;color:#e87067;">⚠ This admin panel uses browser localStorage only. For persistent data across devices, connect a backend (Formspree, Airtable, Firebase) — ask your developer.</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /admin-content -->
+  </div><!-- /admin-body -->
+</div><!-- /admin-wrap -->
+
+<div class="admin-toast" id="adminToast">✅ Saved</div>
+
+<script>
+// ── CREDENTIALS (change in Settings) ──
+var ADMIN_USER = localStorage.getItem('admin_user') || 'admin';
+var ADMIN_PASS = localStorage.getItem('admin_pass') || 'PGT@Justice2026';
+
+// ── DATA STORES ──
+var parliamentarians = JSON.parse(localStorage.getItem('pgt_parliamentarians') || '[]');
+var signatures       = JSON.parse(localStorage.getItem('pgt_signatures')       || '[]');
+var mediaItems       = JSON.parse(localStorage.getItem('pgt_media')            || '[]');
+
+// ── AUTO-LOGIN CHECK ──
+if (sessionStorage.getItem('pgt_admin_auth') === '1') {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminWrap').style.display   = 'flex';
+  refreshDash();
+  renderParliamentarians();
+  renderMedia();
+}
+
+function doLogin() {
+  var u = document.getElementById('adminUser').value.trim();
+  var p = document.getElementById('adminPass').value;
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    sessionStorage.setItem('pgt_admin_auth', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminWrap').style.display   = 'flex';
+    refreshDash();
+    renderParliamentarians();
+    renderMedia();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('pgt_admin_auth');
+  location.reload();
+}
+
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.sidebar-item').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function showToast(msg) {
+  var t = document.getElementById('adminToast');
+  t.textContent = msg || '✅ Saved';
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+// ── REFRESH DASHBOARD ──
+function refreshDash() {
+  document.getElementById('dash-sigs').textContent  = (1247 + signatures.length).toLocaleString();
+  document.getElementById('dash-parl').textContent  = parliamentarians.length;
+}
+
+// ── PARLIAMENTARIANS ──
+var partyColors = { 'pml-n':'chip-pml','ppp':'chip-pppp','pti':'chip-pti','mqm':'chip-mqm','ipp':'chip-gold','jui':'chip-other','other':'chip-other','':"chip-other" };
+var partyLabels = { 'pml-n':'PML-N','ppp':'PPP','pti':'PTI','mqm':'MQM-P','ipp':'IPP','jui':'JUI-F','other':'Other','':"—" };
+
+function addParliamentarian() {
+  var name    = document.getElementById('parl_name').value.trim();
+  var title   = document.getElementById('parl_title').value.trim();
+  var party   = document.getElementById('parl_party').value;
+  var role    = document.getElementById('parl_role').value;
+  var phone   = document.getElementById('parl_phone').value.trim();
+  var email   = document.getElementById('parl_email').value.trim();
+  var twitter = document.getElementById('parl_twitter').value.trim();
+  var constit = document.getElementById('parl_const').value.trim();
+  var notes   = document.getElementById('parl_notes').value.trim();
+  if (!name) { alert('Please enter the parliamentarian\'s name.'); return; }
+  var entry = { id: Date.now(), name, title, party, role, phone, email, twitter, constit, notes, added: new Date().toLocaleDateString('en-PK') };
+  parliamentarians.push(entry);
+  localStorage.setItem('pgt_parliamentarians', JSON.stringify(parliamentarians));
+  renderParliamentarians();
+  clearParlForm();
+  refreshDash();
+  showToast('✅ ' + name + ' added to website!');
+}
+
+function renderParliamentarians() {
+  var tbody = document.getElementById('parlBody');
+  var count = document.getElementById('parlCount');
+  count.textContent = '(' + parliamentarians.length + ')';
+  if (!parliamentarians.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#3a5060;padding:2rem;">No parliamentarians added yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = parliamentarians.map(function(p, i) {
+    return '<tr>' +
+      '<td style="font-weight:600;">' + p.name + '<br><span style="font-size:0.72rem;color:#5a7080;">' + (p.title || '') + '</span></td>' +
+      '<td><span class="party-chip ' + (partyColors[p.party] || 'chip-other') + '">' + (partyLabels[p.party] || '—') + '</span></td>' +
+      '<td style="font-size:0.8rem;color:#8fa0b0;">' + (p.role || '—') + '</td>' +
+      '<td><a href="tel:' + p.phone + '" style="color:#4caf50;font-family:\'DM Mono\',monospace;font-size:0.8rem;">' + (p.phone || '—') + '</a></td>' +
+      '<td><a href="mailto:' + p.email + '" style="color:#90caf9;font-size:0.8rem;">' + (p.email || '—') + '</a></td>' +
+      '<td style="font-family:\'DM Mono\',monospace;font-size:0.78rem;color:#8fa0b0;">' + (p.twitter || '—') + '</td>' +
+      '<td><button class="btn-edit" onclick="editParl(' + i + ')">Edit</button> <button class="btn-danger" onclick="deleteParl(' + i + ')">Del</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function deleteParl(i) {
+  if (!confirm('Remove ' + parliamentarians[i].name + '?')) return;
+  parliamentarians.splice(i, 1);
+  localStorage.setItem('pgt_parliamentarians', JSON.stringify(parliamentarians));
+  renderParliamentarians();
+  refreshDash();
+  showToast('Removed.');
+}
+
+function editParl(i) {
+  var p = parliamentarians[i];
+  document.getElementById('parl_name').value    = p.name    || '';
+  document.getElementById('parl_title').value   = p.title   || '';
+  document.getElementById('parl_party').value   = p.party   || '';
+  document.getElementById('parl_role').value    = p.role    || '';
+  document.getElementById('parl_phone').value   = p.phone   || '';
+  document.getElementById('parl_email').value   = p.email   || '';
+  document.getElementById('parl_twitter').value = p.twitter || '';
+  document.getElementById('parl_const').value   = p.constit || '';
+  document.getElementById('parl_notes').value   = p.notes   || '';
+  parliamentarians.splice(i, 1);
+  localStorage.setItem('pgt_parliamentarians', JSON.stringify(parliamentarians));
+  renderParliamentarians();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  showToast('Loaded for editing. Save when done.');
+}
+
+function clearParlForm() {
+  ['parl_name','parl_title','parl_phone','parl_email','parl_twitter','parl_const','parl_notes'].forEach(function(id){ document.getElementById(id).value = ''; });
+  document.getElementById('parl_party').value = '';
+  document.getElementById('parl_role').value  = '';
+}
+
+function exportParliamentarians() {
+  if (!parliamentarians.length) { alert('No parliamentarians to export.'); return; }
+  var csv = 'Name,Title,Party,Role,Phone,Email,Twitter,Constituency,Notes\n';
+  parliamentarians.forEach(function(p) {
+    csv += [p.name,p.title,partyLabels[p.party]||p.party,p.role,p.phone,p.email,p.twitter,p.constit,p.notes].map(function(v){ return '"'+(v||'').replace(/"/g,'""')+'"'; }).join(',') + '\n';
+  });
+  downloadFile('parliamentarians.csv', csv, 'text/csv');
+}
+
+// ── DOCUMENTS ──
+function addDocument() {
+  var title = document.getElementById('doc_title').value.trim();
+  if (!title) { alert('Please enter document title.'); return; }
+  var row = document.createElement('tr');
+  row.innerHTML = '<td>' + title + '</td>' +
+    '<td style="font-family:\'DM Mono\',monospace;font-size:0.76rem;">' + (document.getElementById('doc_ref').value || '—') + '</td>' +
+    '<td>' + (document.getElementById('doc_auth').value || '—') + '</td>' +
+    '<td>' + (document.getElementById('doc_date').value || '—') + '</td>' +
+    '<td><span class="badge badge-blue">' + document.getElementById('doc_type').value.split(' ')[0] + '</span></td>' +
+    '<td><button class="btn-edit">Edit</button> <button class="btn-danger">Del</button></td>';
+  var body = document.getElementById('docBody');
+  body.appendChild(row);
+  ['doc_title','doc_ref','doc_auth','doc_date','doc_summary'].forEach(function(id){ document.getElementById(id).value = ''; });
+  showToast('✅ Document added to registry.');
+}
+
+// ── MEDIA ──
+function addMedia() {
+  var title = document.getElementById('media_title').value.trim();
+  if (!title) { alert('Please enter headline.'); return; }
+  var item = {
+    title: title,
+    pub: document.getElementById('media_pub').value.trim(),
+    date: document.getElementById('media_date').value,
+    url: document.getElementById('media_url').value.trim()
+  };
+  mediaItems.push(item);
+  localStorage.setItem('pgt_media', JSON.stringify(mediaItems));
+  renderMedia();
+  ['media_title','media_pub','media_date','media_url'].forEach(function(id){ document.getElementById(id).value = ''; });
+  showToast('✅ Media coverage added.');
+}
+
+function renderMedia() {
+  var tbody = document.getElementById('mediaBody');
+  if (!mediaItems.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#3a5060;padding:2rem;">No media coverage added yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = mediaItems.map(function(m, i) {
+    return '<tr>' +
+      '<td><a href="' + m.url + '" target="_blank" style="color:#90caf9;">' + m.title + '</a></td>' +
+      '<td style="font-weight:600;">' + m.pub + '</td>' +
+      '<td style="font-family:\'DM Mono\',monospace;font-size:0.78rem;">' + m.date + '</td>' +
+      '<td><button class="btn-danger" onclick="deleteMedia(' + i + ')">Del</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function deleteMedia(i) {
+  mediaItems.splice(i, 1);
+  localStorage.setItem('pgt_media', JSON.stringify(mediaItems));
+  renderMedia();
+  showToast('Removed.');
+}
+
+// ── SIGNATURES ──
+function exportSignatures() {
+  var csv = 'Name,Hospital,City,Speciality,Email,Date\n';
+  signatures.forEach(function(s) {
+    csv += [s.name,s.hosp,s.city,s.spec,s.email,s.date].map(function(v){ return '"'+(v||'').replace(/"/g,'""')+'"'; }).join(',') + '\n';
+  });
+  if (!signatures.length) csv += '"No signatures recorded in this session","","","","",""\n';
+  downloadFile('pgt_signatures.csv', csv, 'text/csv');
+}
+
+// ── SETTINGS ──
+function changePassword() {
+  var curr = document.getElementById('curr_pass').value;
+  var nw   = document.getElementById('new_pass').value;
+  var conf = document.getElementById('conf_pass').value;
+  if (curr !== ADMIN_PASS) { alert('Current password incorrect.'); return; }
+  if (nw.length < 8) { alert('New password must be at least 8 characters.'); return; }
+  if (nw !== conf) { alert('Passwords do not match.'); return; }
+  localStorage.setItem('admin_pass', nw);
+  ADMIN_PASS = nw;
+  ['curr_pass','new_pass','conf_pass'].forEach(function(id){ document.getElementById(id).value = ''; });
+  showToast('✅ Password updated successfully!');
+}
+
+// ── UTILS ──
+function downloadFile(name, content, type) {
+  var blob = new Blob([content], { type: type });
+  var a    = document.createElement('a');
+  a.href   = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+</script>
+</body>
+</html>
