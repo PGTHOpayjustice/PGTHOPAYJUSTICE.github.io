@@ -1,0 +1,100 @@
+{
+  "id": "/",
+  "name": "PGT & HO Pay Justice Pakistan",
+  "short_name": "PGT Pay Justice",
+  "description": "Campaign for fair stipends for Federal Postgraduate Medical Trainees and House Officers in Pakistan. Federal stipend frozen at Rs.104,390 since 2020. Sign, file, act.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#0f1923",
+  "theme_color": "#c0392b",
+  "orientation": "portrait-primary",
+  "lang": "en-PK",
+  "dir": "ltr",
+  "categories": ["medical", "government", "social"],
+  "icons": [
+    {
+      "src": "/Docs/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Docs/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Docs/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/Docs/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/Docs/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "PGT Pay Justice — Campaign homepage"
+    },
+    {
+      "src": "/Docs/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "PGT Pay Justice — Pay comparison table"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Sign the Petition",
+      "short_name": "Sign",
+      "description": "Add your name to the national PGT & HO stipend petition",
+      "url": "/#petition",
+      "icons": [{ "src": "/Docs/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "File a Complaint",
+      "short_name": "Complain",
+      "description": "Open the one-press complaint launcher — 7 authorities",
+      "url": "/#onepress",
+      "icons": [{ "src": "/Docs/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Report Your Pay",
+      "short_name": "Report",
+      "description": "Report your stipend anonymously to the campaign database",
+      "url": "/#report",
+      "icons": [{ "src": "/Docs/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Contact Parliamentarians",
+      "short_name": "MPs",
+      "description": "Call NA & Senate Health Committee members directly",
+      "url": "/#parliamentarians",
+      "icons": [{ "src": "/Docs/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "related_applications": [],
+  "prefer_related_applications": false
+}

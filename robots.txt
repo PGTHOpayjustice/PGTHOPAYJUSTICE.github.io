@@ -1,0 +1,81 @@
+# PGT & HO Pay Justice Pakistan — robots.txt
+# 2026 best practice: explicit rules for Googlebot, AI crawlers, and other bots
+
+# ── Standard search engines — allow everything except admin ──
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+# ── Sitemap ──
+Sitemap: https://pgthopayjustice.github.io/sitemap.xml
+
+# ── Google — allow everything including AI training ──
+User-agent: Googlebot
+Allow: /
+Disallow: /admin.html
+
+User-agent: Google-Extended
+Allow: /
+
+# ── OpenAI ──
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# ── Anthropic ──
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# ── Perplexity ──
+User-agent: PerplexityBot
+Allow: /
+
+# ── Microsoft / Bing ──
+User-agent: Bingbot
+Allow: /
+Disallow: /admin.html
+
+User-agent: BingPreview
+Allow: /
+
+# ── Meta / Facebook ──
+User-agent: facebookexternalhit
+Allow: /
+
+# ── WhatsApp link preview bot — must allow for previews to work ──
+User-agent: WhatsApp
+Allow: /
+
+# ── Twitter / X link preview ──
+User-agent: Twitterbot
+Allow: /
+
+# ── LinkedIn preview ──
+User-agent: LinkedInBot
+Allow: /
+
+# ── Common Crawl (used by many AI training datasets) ──
+User-agent: CCBot
+Allow: /
+
+# ── iMessage / Apple ──
+User-agent: Applebot
+Allow: /
+
+# ── Block scrapers and spam bots — these add no value ──
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
